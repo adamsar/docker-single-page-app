@@ -1,0 +1,106 @@
+worker_processes  1;
+worker_rlimit_nofile 10480;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  text/html;
+
+    ## Start: Size Limits & Buffer Overflows ##
+    client_body_buffer_size  1k;
+    client_header_buffer_size 1k;
+    client_max_body_size 1k;
+    large_client_header_buffers 2 1k;
+     ## END: Size Limits & Buffer Overflows ##
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    # keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    gzip  on;
+    # index index.html;
+    server {
+       listen        80;
+       server_name   _;
+       resolver                  8.8.8.8 valid=300s;
+       resolver_timeout          10s;
+
+       location = / {
+                proxy_hide_header x-amz-delete-marker;
+                proxy_hide_header x-amz-id-2;
+                proxy_hide_header x-amz-request-id;
+                proxy_hide_header x-amz-version-id;
+                proxy_hide_header etag;
+                expires -1;
+                proxy_pass http://$S3_BUCKET.s3-ap-northeast-1.amazon
+aws.com/$INDEX_BASE/index.html;
+       }
+
+       location  / {
+            rewrite  ^/.* / last;
+      }
+
+      location ~* \.(jpg|jpeg|gif|png|css|js|ico|xml|rss|txt|eot|woff|woff2|ttf|svg)<dollar>
+ {
+               if (<request_method> = 'OPTIONS') {
+                  add_header 'Access-Control-Allow-Origin' '*';
+                  add_header 'Access-Control-Allow-Credentials' 'true
+';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POS
+T, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-Cu
+stomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,C
+ache-Control,Content-Type';
+                  add_header 'Access-Control-Max-Age' 1728000;
+                  add_header 'Content-Type' 'text/plain charset=UTF-8
+';
+                  add_header 'Content-Length' 0;
+                  return 204;
+               }
+
+               if (<request_method> = 'POST') {
+                  add_header 'Access-Control-Allow-Origin' '*';
+                  add_header 'Access-Control-Allow-Credentials' 'true
+';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POS
+T, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-Cu
+stomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,C
+ache-Control,Content-Type';
+               }
+
+               if (<request_method> = 'GET') {
+                  add_header 'Access-Control-Allow-Origin' '*';
+                  add_header 'Access-Control-Allow-Credentials' 'true
+';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POS
+T, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-Cu
+stomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,C
+ache-Control,Content-Type';
+               }
+
+               expires off;
+               proxy_hide_header x-amz-delete-marker;
+               proxy_hide_header x-amz-id-2;
+               proxy_hide_header x-amz-request-id;
+               proxy_hide_header x-amz-version-id;
+
+               # only rely on last-modified (which will never change)
+               proxy_hide_header etag;
+               rewrite ^\/(.+)$ /$INDEX_BASE/<1> break;
+               proxy_pass http://$S3_BUCKET.s3-ap-northeast-1.amazona
+ws.com;
+       }
+
+       location /heartbeat {
+            access_log off;
+            return 200;
+       }
+     }
+}
