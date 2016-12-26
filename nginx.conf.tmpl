@@ -37,8 +37,7 @@ http {
                 proxy_hide_header x-amz-version-id;
                 proxy_hide_header etag;
                 expires -1;
-                proxy_pass http://$S3_BUCKET.s3-ap-northeast-1.amazon
-aws.com/$INDEX_BASE/index.html;
+                proxy_pass http://$S3_BUCKET.s3-ap-northeast-1.amazonaws.com/$INDEX_BASE/index.html;
        }
 
        location  / {
@@ -49,40 +48,28 @@ aws.com/$INDEX_BASE/index.html;
  {
                if (<request_method> = 'OPTIONS') {
                   add_header 'Access-Control-Allow-Origin' '*';
-                  add_header 'Access-Control-Allow-Credentials' 'true
-';
-                  add_header 'Access-Control-Allow-Methods' 'GET, POS
-T, OPTIONS';
-                  add_header 'Access-Control-Allow-Headers' 'DNT,X-Cu
-stomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,C
-ache-Control,Content-Type';
+                  add_header 'Access-Control-Allow-Credentials' 'true';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
                   add_header 'Access-Control-Max-Age' 1728000;
-                  add_header 'Content-Type' 'text/plain charset=UTF-8
-';
+                  add_header 'Content-Type' 'text/plain charset=UTF-8';
                   add_header 'Content-Length' 0;
                   return 204;
                }
 
                if (<request_method> = 'POST') {
                   add_header 'Access-Control-Allow-Origin' '*';
-                  add_header 'Access-Control-Allow-Credentials' 'true
-';
-                  add_header 'Access-Control-Allow-Methods' 'GET, POS
-T, OPTIONS';
-                  add_header 'Access-Control-Allow-Headers' 'DNT,X-Cu
-stomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,C
-ache-Control,Content-Type';
+                  add_header 'Access-Control-Allow-Credentials' 'true';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-Wit,If-Modified-Since,Cache-Control,Content-Type';
                }
 
                if (<request_method> = 'GET') {
                   add_header 'Access-Control-Allow-Origin' '*';
                   add_header 'Access-Control-Allow-Credentials' 'true
 ';
-                  add_header 'Access-Control-Allow-Methods' 'GET, POS
-T, OPTIONS';
-                  add_header 'Access-Control-Allow-Headers' 'DNT,X-Cu
-stomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,C
-ache-Control,Content-Type';
+                  add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-Wit,If-Modified-Since,Cache-Control,Content-Type';
                }
 
                expires off;
@@ -94,8 +81,7 @@ ache-Control,Content-Type';
                # only rely on last-modified (which will never change)
                proxy_hide_header etag;
                rewrite ^\/(.+)$ /$INDEX_BASE/<1> break;
-               proxy_pass http://$S3_BUCKET.s3-ap-northeast-1.amazona
-ws.com;
+               proxy_pass http://$S3_BUCKET.s3-ap-northeast-1.amazonaws.com;
        }
 
        location /heartbeat {
